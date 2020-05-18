@@ -7,6 +7,7 @@ class UserForm extends StatelessWidget {
 
   final _form = GlobalKey<FormState>();
   final Map<String, String> _formData = {};
+  bool _isLoading = false;
 
   void _loadFormData(User user) {
     if(user != null) 
@@ -28,13 +29,18 @@ class UserForm extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: () {
+            onPressed: () async {
               final isValid = _form.currentState.validate();
 
               if(isValid)
               {
                 _form.currentState.save();
-                Provider.of<Users>(context, listen: false).put(
+                
+                // setState(() {
+                //   _isLoading = true;
+                // });
+
+                await Provider.of<Users>(context, listen: false).put(
                   User(
                     id: _formData['id'],
                     name: _formData['name'],
@@ -42,13 +48,18 @@ class UserForm extends StatelessWidget {
                     avatarUrl: _formData['avatarUrl'], 
                     ),
                   );
+
+                //    setState(() {
+                //   _isLoading = false;
+                // });
+                
                 Navigator.of(context).pop();
               }
             },
           )
         ],
       ),
-      body: Padding(padding: EdgeInsets.all(15),
+      body: _isLoading ? Center (child: CircularProgressIndicator(),) : Padding(padding: EdgeInsets.all(15),
       child:  Form(
         key: _form,
         child: Column(

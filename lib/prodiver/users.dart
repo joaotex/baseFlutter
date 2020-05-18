@@ -1,10 +1,15 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_crud/data/dummy_users.dart';
 import 'package:flutter_crud/models/User.dart';
+import 'package:http/http.dart' as http;
 
 class Users with ChangeNotifier {
+
+  static const _baserUrl = "";
+
   final Map<String, User> _items = {...DUMMY_USERS};
 
   List<User> get all { 
@@ -19,7 +24,7 @@ class Users with ChangeNotifier {
     return _items.values.elementAt(i);
   }
 
-  void put(User user) {
+  Future<void> put(User user)  async{
     if(user == null) {
       return;
     }
@@ -36,8 +41,17 @@ class Users with ChangeNotifier {
         avatarUrl: user.avatarUrl,
         ));
     } else {
-        // adicionar 
-        final id = Random().nextDouble().toString();
+
+      final response = await http.post(
+        "$_baserUrl/users.json", 
+        body : jsonEncode({
+          'name': user.name, 
+          'email': user.email, 
+          'avatarUrl': user.avatarUrl,
+        }),
+      );
+
+      final id = jsonDecode(response.body) ['name'];
 
         _items.putIfAbsent(id, () => User(
           id: id, 
